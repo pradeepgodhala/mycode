@@ -1,0 +1,42 @@
+---
+- name: Arista Switch Config Archiver
+  hosts: arista_switches
+  gather_facts: false
+  connection: network_cli # required to connect to most network devices (CLI over SSH)
+  become: yes # required to run the entire playbook as "enable"
+  become_method: enable #required when elevated status is something other than "sudo"
+
+
+  vars:
+          ansible_ssh_pass: alta3 # needs secured! this is a job for Ansible vault
+
+   
+  tasks:
+          - name: Arista Fact collection
+            eos_facts:
+                    gather_subset: all # IMPORTANT! Look at the return values at the bottom of the eos_facts
+
+          # this will be executed on the controller
+          - name: Create Arista config save directory
+            run_once: true
+            file:
+                    path: Arista_Config/        # this will be created on the controller
+                    state: directory            # Playbook will FAIL without this directory
+          
+                    
+          # this will be executed on the controller
+          - name: Create Arista Archive config save directory
+            run_once: true
+            file:
+                     path: Arista_Archive_Config/        # this will be created on the controller
+                     state: directory                    # Playbook will FAIL without this directory
+          # this will be executed on the controller
+          - name: Arista Config save
+            shell: "echo '{{ ansible_net_config }}' > Arista_Config/{{ ansible_net_hostname }}"
+                
+
+          # This will be executed on the controller
+          - name: Arista Config Archival Process
+            archive:
+                    path: Arista_Archive_Config/ {{ ansible_net_hostname}} 
+                    remove: False     

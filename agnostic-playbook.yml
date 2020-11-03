@@ -1,0 +1,35 @@
+---
+- name: Using CLI_Command agnostic modules
+  hosts: arista_switches
+  gather_facts: false
+  connection: network_cli
+  become: yes
+  become_method: enable
+
+  vars:
+          ansible_ssh_pass: alta3
+
+  tasks:
+          # this is a network "agnostic" module, in that it should work on every Ansible supported
+          # network_cli device. Unlike arista.eos.eos_cli, this module only accepts STR input
+          # to the arugment "command". Therefore we must LOOP to perform the same operation
+          - name: Run multiple commands on remote nodes
+            ansible.netcommon.cli_command:
+                    command: "{{ item }}"       # item is replaced by the next up in the list
+            loop:
+                    - show version
+                    - show interfaces
+            register: show_output       # variable to register with JSON response to the EOS_Command module
+                                        # results of both commands are store in this var
+          - name: Take a peak as to what is inside of the "show_output"
+            debug:
+                    var: show_output
+          - name: Take a peak at "just" the JSON returned to the command "show version"
+            debug:
+                    var: show_output.results[0]
+          - name: Take a peak at "just" the JSON returned to the command "show interfaces"
+            debug:
+                    var: show_output.results[1]
+          - name: Display The System MAC address for switches
+            debug:
+                    var:       
