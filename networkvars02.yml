@@ -1,0 +1,32 @@
+---
+- name: Network Agnostic Playbook 
+  hosts: arista_switches
+  gather_facts: no
+  
+  vars:
+          dnsserver: "8.8.8.8"
+
+  vars_files:
+          - vault.yml  # hide this with ansible-vault if you like
+  
+  tasks: 
+          - name: Take backup of the switches
+            arista.eos.eos_config:
+                    backup: yes
+                    backup_options:
+                            # filename: "{{ ansible_host }}_config"
+                            dir_path: /home/student/mycode/Arista_Config/
+
+          - name: CONFIGURE DNS 
+            cli_config:
+                    config: ip name-server {{ dnsserver }}
+
+          - name: CHECK CONFIGURATION
+            cli_command:
+                    command: show run | i ip name-server
+            register: show_output
+
+          - name: PRINT OUTPUT TO SCREEN
+            debug:
+                    var: show_output.stdout
+      

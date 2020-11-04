@@ -1,0 +1,25 @@
+! Command: show running-config
+! device: napya-5084-sw-01 (vEOS, EOS-4.22.0F)
+!
+! boot system flash:/vEOS-lab.swi
+!
+transceiver qsfp default-mode 4x10G
+!
+hostname napya-5084-sw-01
+ip name-server vrf default 208.67.222.222
+ip name-server vrf default 208.67.222.223
+ip name-server vrf default 8.8.8.8
+!
+spanning-tree mode mstp
+!
+no aaa root
+!
+username admin role network-admin secret sha512 $6$oUXaPwUj4J1HP9cf$bXPZyss9YNRGV9GbUdRCBJUe0/n8K2KLW/sEwPexoTZ.FuN4W2.4JzKs4qOG183KCAHm7h3gDwJNX6jild94E1
+!
+interface Management1
+   ip address dhcp
+   dhcp client accept default-route
+!
+no ip routing
+!
+end
